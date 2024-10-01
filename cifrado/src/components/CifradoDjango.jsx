@@ -90,7 +90,7 @@ function CifradoDjango() {
             return;
         }
 
-        axios.post('http://localhost:3001/encryption/submit/', formData)
+        axios.post('https://cifrados.onrender.com/submit/', formData)
             .then(res => {
                 setEncryptedData(res.data);
                 setEncryptErrorMessage('');

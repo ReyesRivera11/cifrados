@@ -1,13 +1,10 @@
-# settings.py ajustado
+# backend_django/settings.py
 
 import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-ejce(pqmd@bh_dwa1&51c1ayct*lc)(b-ut3rdw8n$-*_$r0r-')
@@ -63,7 +60,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend_django.wsgi.application'
 
-# Si no usas base de datos, comenta o elimina la sección de `DATABASES`
+# Si no usas base de datos, desactiva completamente la configuración de `DATABASES`
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -71,13 +68,15 @@ WSGI_APPLICATION = 'backend_django.wsgi.application'
 #     }
 # }
 
-# Password validation
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
+DATABASES = {}  # Eliminando la configuración de bases de datos para no usar ninguna.
+
+# Password validation - Opcional si no usas autenticación
+# AUTH_PASSWORD_VALIDATORS = [
+#     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+#     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+#     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+#     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+# ]
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
@@ -99,3 +98,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Seguridad para despliegue en Render 
 CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
 SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False') == 'True'
+
+# Ajustes adicionales si no usas el sistema de autenticación o sesiones
+SESSION_ENGINE = None
+AUTHENTICATION_BACKENDS = []

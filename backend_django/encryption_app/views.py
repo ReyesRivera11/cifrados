@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from Crypto.Cipher import AES
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
-from Crypto.Util.Padding import pad, unpad  # Importar funciones de relleno y eliminación de relleno
+from Crypto.Util.Padding import pad, unpad
 from base64 import b64encode, b64decode
 import hashlib
 import json
@@ -18,23 +18,19 @@ rsa_key = RSA.generate(2048)
 public_key = rsa_key.publickey().export_key()
 private_key = rsa_key.export_key()
 
-# Función para agregar relleno (padding)
-def pad_data(data):
-    """Añadir relleno a los datos para que sean múltiplos de BLOCK_SIZE bytes."""
-    return pad(data.encode(), BLOCK_SIZE)
-
-# Función para eliminar el relleno (unpadding)
-def unpad_data(data):
-    """Eliminar relleno de los datos."""
-    return unpad(data, BLOCK_SIZE).decode('utf-8')
-
 @csrf_exempt
 def encrypt_view(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            print("Datos recibidos para cifrado:", data)
+            # Intentar parsear el cuerpo de la solicitud JSON
+            try:
+                data = json.loads(request.body)
+                print("Datos recibidos para cifrado:", data)
+            except json.JSONDecodeError as json_err:
+                print("Error de JSON:", json_err)
+                return JsonResponse({'error': 'Formato JSON no válido en la solicitud.'}, status=400)
 
+            # Extraer campos del JSON recibido
             user_key = data.get('userKey')
             name = data.get('name')
             email = data.get('email')
@@ -58,10 +54,10 @@ def encrypt_view(request):
             iv = cipher_aes.iv
 
             # Agregar relleno a los datos antes de cifrar
-            encrypted_name = b64encode(cipher_aes.encrypt(pad_data(name))).decode()
-            encrypted_address = b64encode(cipher_aes.encrypt(pad_data(address))).decode()
-            encrypted_email = b64encode(cipher_aes.encrypt(pad_data(email))).decode()
-            encrypted_credit_card = b64encode(cipher_aes.encrypt(pad_data(credit_card))).decode()
+            encrypted_name = b64encode(cipher_aes.encrypt(pad(name.encode(), BLOCK_SIZE))).decode()
+            encrypted_address = b64encode(cipher_aes.encrypt(pad(address.encode(), BLOCK_SIZE))).decode()
+            encrypted_email = b64encode(cipher_aes.encrypt(pad(email.encode(), BLOCK_SIZE))).decode()
+            encrypted_credit_card = b64encode(cipher_aes.encrypt(pad(credit_card.encode(), BLOCK_SIZE))).decode()
 
             # Cifrado asimétrico usando RSA
             rsa_cipher = PKCS1_OAEP.new(RSA.import_key(public_key))
@@ -79,18 +75,23 @@ def encrypt_view(request):
                 'hashPassword': hash_password,
                 'iv': b64encode(iv).decode()  # Devuelve el IV para usar en el descifrado
             })
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Formato JSON no válido en la solicitud.'}, status=400)
         except Exception as e:
+            # Imprimir el error completo en consola y enviar mensaje al cliente
             print("Error durante el cifrado:", str(e))  # Imprimir el error en la consola de Django
             return JsonResponse({'error': f'Error durante el cifrado: {str(e)}'}, status=500)
+
 
 @csrf_exempt
 def decrypt_view(request):
     if request.method == 'POST':
         try:
-            data = json.loads(request.body)
-            # print("Datos recibidos para descifrado:", data)
+            # Intentar parsear el cuerpo de la solicitud JSON
+            try:
+                data = json.loads(request.body)
+                print("Datos recibidos para descifrado:", data)
+            except json.JSONDecodeError as json_err:
+                print("Error de JSON:", json_err)
+                return JsonResponse({'error': 'Formato JSON no válido en la solicitud.'}, status=400)
 
             user_key = data.get('userKey')
             encrypted_name = data.get('encryptedName')
@@ -108,10 +109,10 @@ def decrypt_view(request):
 
             # Descifrado usando AES
             cipher_aes = AES.new(symmetric_key, AES.MODE_CBC, iv=b64decode(iv))
-            decrypted_name = unpad_data(cipher_aes.decrypt(b64decode(encrypted_name)))
-            decrypted_address = unpad_data(cipher_aes.decrypt(b64decode(encrypted_address)))
-            decrypted_email = unpad_data(cipher_aes.decrypt(b64decode(encrypted_email)))
-            decrypted_credit_card = unpad_data(cipher_aes.decrypt(b64decode(encrypted_credit_card)))
+            decrypted_name = unpad(cipher_aes.decrypt(b64decode(encrypted_name)), BLOCK_SIZE).decode()
+            decrypted_address = unpad(cipher_aes.decrypt(b64decode(encrypted_address)), BLOCK_SIZE).decode()
+            decrypted_email = unpad(cipher_aes.decrypt(b64decode(encrypted_email)), BLOCK_SIZE).decode()
+            decrypted_credit_card = unpad(cipher_aes.decrypt(b64decode(encrypted_credit_card)), BLOCK_SIZE).decode()
 
             # Descifrado asimétrico usando RSA
             rsa_cipher = PKCS1_OAEP.new(RSA.import_key(private_key))
@@ -124,8 +125,6 @@ def decrypt_view(request):
                 'decryptedPhone': decrypted_phone,
                 'decryptedCreditCard': decrypted_credit_card
             })
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Formato JSON no válido en la solicitud.'}, status=400)
         except Exception as e:
             print("Error durante el descifrado:", str(e))  # Imprimir el error en la consola de Django
             return JsonResponse({'error': f'Error durante el descifrado: {str(e)}'}, status=500)
