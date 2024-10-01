@@ -1,4 +1,4 @@
-# backend_django/settings.py
+# settings.py completo
 
 import os
 from pathlib import Path
@@ -19,7 +19,6 @@ ALLOWED_HOSTS = ['reyesrivera11.github.io', 'localhost', '127.0.0.1', '.onrender
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.contenttypes',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
     'encryption_app',  # Aplicación de cifrado
     'corsheaders',
@@ -31,7 +30,6 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoise para servir archivos estáticos en producción
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -52,7 +50,6 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -61,22 +58,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend_django.wsgi.application'
 
 # Si no usas base de datos, desactiva completamente la configuración de `DATABASES`
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {}  # Eliminando la configuración de bases de datos para no usar ninguna.
-
-# Password validation - Opcional si no usas autenticación
-# AUTH_PASSWORD_VALIDATORS = [
-#     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-#     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-#     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-#     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-# ]
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
@@ -98,7 +80,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Seguridad para despliegue en Render 
 CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
 SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False') == 'True'
-
-# Ajustes adicionales si no usas el sistema de autenticación o sesiones
-SESSION_ENGINE = None
-AUTHENTICATION_BACKENDS = []
