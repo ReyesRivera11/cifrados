@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: backend-django
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn backend_django.wsgi --log-file -"
+    envVars:
+      - key: DEBUG
+        value: "True"  # Cambia a "False" en producción
