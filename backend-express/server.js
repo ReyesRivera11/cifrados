@@ -5,10 +5,12 @@ const NodeRSA = require('node-rsa');
 const cors = require('cors');
 const { gostCrypto, gostEngine } = require('node-gost-crypto');
 const app = express();
+
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['https://reyesrivera11.github.io', 'http://localhost:5173'],
     credentials: true
 }));
+
 app.use(bodyParser.json());
 
 // Función para derivar una clave segura a partir de la clave de 16 caracteres del usuario
@@ -25,10 +27,23 @@ function encryptData(data, key) {
     return { iv: iv.toString('base64'), encryptedData: encrypted }; // Devolver IV y datos cifrados
 }
 
+// Función para descifrar datos usando AES
+function decryptData(encryptedData, key) {
+    const iv = Buffer.from(encryptedData.iv, 'base64'); // IV usado en el cifrado
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv); // Descifrado AES
+    let decrypted = decipher.update(encryptedData.encryptedData, 'base64', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted; // Retornar los datos descifrados
+}
+
 // Generar par de llaves RSA
 const rsaKey = new NodeRSA({ b: 2048 });
-const publicKey = rsaKey.exportKey('public');
-const privateKey = rsaKey.exportKey('private');
+const publicKey = rsaKey.exportKey('public'); // Clave pública en formato PEM
+const privateKey = rsaKey.exportKey('private'); // Clave privada en formato PEM
+
+// Crear instancias separadas para la clave pública y privada
+const rsaPublicKey = new NodeRSA(publicKey); // Instancia con la clave pública
+const rsaPrivateKey = new NodeRSA(privateKey); // Instancia con la clave privada
 
 // Función para hacer hash utilizando GOST R 34.11-94
 const hashGOST = async (text) => {
@@ -57,14 +72,14 @@ app.post('/submit', async (req, res) => {
     // Derivar una clave de 32 bytes (256 bits) a partir de la clave del usuario
     const symmetricKey = deriveKeyFromUserInput(userKey);
 
-    // Cifrado simétrico (AES) para nombre y dirección
+    // Cifrado simétrico (AES) para nombre, dirección y correo
     const encryptedName = encryptData(name, symmetricKey);
     const encryptedAddress = encryptData(address, symmetricKey);
     const encryptedEmail = encryptData(email, symmetricKey);
 
-    // Cifrado asimétrico (RSA) para tarjeta de crédito y teléfono
-    const encryptedPhone = rsaKey.encrypt(phone, 'base64');
-    const encryptedCreditCard = rsaKey.encrypt(creditCard, 'base64');
+    // Cifrado asimétrico (RSA) para teléfono y tarjeta de crédito usando la clave pública
+    const encryptedPhone = rsaPublicKey.encrypt(phone, 'base64');
+    const encryptedCreditCard = rsaPublicKey.encrypt(creditCard, 'base64');
 
     // Hash con GOST R 34.11-94 para la contraseña
     const { digestEngine, digestCrypto } = await hashGOST(password);
@@ -90,23 +105,14 @@ app.post('/decrypt', (req, res) => {
     const symmetricKey = deriveKeyFromUserInput(userKey);
 
     try {
-        // Función para descifrar datos usando AES
-        function decryptData(encryptedData, key) {
-            const iv = Buffer.from(encryptedData.iv, 'base64'); // IV usado en el cifrado
-            const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv); // Descifrado AES
-            let decrypted = decipher.update(encryptedData.encryptedData, 'base64', 'utf8');
-            decrypted += decipher.final('utf8');
-            return decrypted; // Retornar los datos descifrados
-        }
-
-        // Descifrar nombre y dirección usando AES
+        // Descifrar nombre, dirección y correo usando AES
         const decryptedName = decryptData(encryptedName, symmetricKey);
         const decryptedAddress = decryptData(encryptedAddress, symmetricKey);
         const decryptedEmail = decryptData(encryptedEmail, symmetricKey);
 
-        // Descifrar teléfono y tarjeta de crédito usando RSA
-        const decryptedPhone = rsaKey.decrypt(encryptedPhone, 'utf8');
-        const decryptedCreditCard = rsaKey.decrypt(encryptedCreditCard, 'utf8');
+        // Descifrar teléfono y tarjeta de crédito usando la clave privada RSA
+        const decryptedPhone = rsaPrivateKey.decrypt(encryptedPhone, 'utf8');
+        const decryptedCreditCard = rsaPrivateKey.decrypt(encryptedCreditCard, 'utf8');
 
         // Responder con los datos descifrados
         res.json({
@@ -124,6 +130,7 @@ app.post('/decrypt', (req, res) => {
     }
 });
 
+// Ruta de prueba
 app.get('/helloworld', (req, res) => {
     res.send('¡Hola desde Express en Vercel!');
 });
@@ -132,6 +139,5 @@ app.get('/helloworld', (req, res) => {
 app.listen(3001, () => {
     console.log('Server running on port 3001');
 });
-
 
 module.exports = app;

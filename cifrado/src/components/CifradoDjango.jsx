@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ClipLoader } from 'react-spinners';
+
 function CifradoDjango() {
     const [formData, setFormData] = useState({
         userKey: '',
@@ -15,6 +17,8 @@ function CifradoDjango() {
 
     const [decryptKey, setDecryptKey] = useState('');
     const [encryptedData, setEncryptedData] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading2, setIsLoading2] = useState(false);
     const [decryptedData, setDecryptedData] = useState({});
     const [encryptErrorMessage, setEncryptErrorMessage] = useState('');
     const [decryptErrorMessage, setDecryptErrorMessage] = useState('');
@@ -89,16 +93,19 @@ function CifradoDjango() {
         if (Object.keys(errors).length > 0 || phoneError || creditCardError) {
             return;
         }
-
-        axios.post('https://cifrados.onrender.com/submit/', formData)
+        setIsLoading(true);
+        axios.post('https://cifrados.onrender.com/encryption/submit/', formData)
             .then(res => {
                 setEncryptedData(res.data);
                 setEncryptErrorMessage('');
                 setKeyError(false);
                 toast.success('Datos cifrados con éxito.');
+                setIsLoading(false);
             })
             .catch(err => {
                 toast.error('Error en el servidor. Inténtalo nuevamente más tarde.');
+                setIsLoading(false);
+
             });
     };
 
@@ -118,8 +125,8 @@ function CifradoDjango() {
             setDecryptErrorMessage('No hay datos cifrados para descifrar.');
             return;
         }
-
-        axios.post('http://localhost:3001/encryption/decrypt/', {
+        setIsLoading2(true);
+        axios.post('https://cifrados.onrender.com/encryption/decrypt/', {
             userKey: decryptKey,
             encryptedName: encryptedData.encryptedName,
             encryptedAddress: encryptedData.encryptedAddress,
@@ -133,13 +140,17 @@ function CifradoDjango() {
                 setDecryptErrorMessage('');
                 setDecryptKeyError(false);
                 setKeyMismatchError(false);
+                setIsLoading2(false);
             })
             .catch(err => {
                 if (err.response && err.response.data && err.response.data.error) {
                     setKeyMismatchError(true);
+                    setIsLoading2(false);
                     setDecryptErrorMessage('Las claves no coinciden. Intenta nuevamente.');
                 } else {
                     toast.error('Error en el servidor. Inténtalo nuevamente más tarde.');
+                    setIsLoading2(false);
+
                 }
                 setDecryptKeyError(true);
             });
@@ -184,7 +195,7 @@ function CifradoDjango() {
                         </div>
 
                         <div>
-                            <label className="mb-1">Teléfono (10 dígitos)</label>
+                            <label className="mb-1">Teléfono</label>
                             <input
                                 name="phone"
                                 placeholder="Teléfono"
@@ -207,7 +218,7 @@ function CifradoDjango() {
                         </div>
                     </div>
 
-                    <label className="mb-1">Tarjeta de Crédito (solo números)</label>
+                    <label className="mb-1">Tarjeta de Crédito</label>
                     <input
                         name="creditCard"
                         placeholder="Tarjeta de Crédito"
@@ -229,9 +240,14 @@ function CifradoDjango() {
 
                     <button
                         onClick={handleEncrypt}
+                        disabled={Boolean(isLoading)}
                         className="w-full lg:w-48 text-white bg-violet-600 px-4 py-2 rounded-lg hover:bg-violet-800 transition duration-200 hover:text-white font-bold"
                     >
-                        Cifrar
+                        {
+                            isLoading ? <ClipLoader color="#fff" loading={isLoading} size={10} /> : <>
+                                Cifrar
+                            </>
+                        }
                     </button>
                 </div>
 
@@ -263,9 +279,14 @@ function CifradoDjango() {
 
                             <button
                                 onClick={handleDecrypt}
+                                disabled={Boolean(isLoading2)}
                                 className="w-full mt-2 lg:w-48 text-white bg-violet-600 px-4 py-2 rounded-lg hover:bg-violet-800 transition duration-200 hover:text-white font-bold"
                             >
-                                Descifrar
+                                {
+                                    isLoading2 ? <ClipLoader color="#fff" loading={isLoading2} size={10} /> : <>
+                                        Descifrar
+                                    </>
+                                }
                             </button>
                         </div>)
                     }
@@ -279,6 +300,7 @@ function CifradoDjango() {
                             <p><strong>Teléfono:</strong> {decryptedData.decryptedPhone}</p>
                             <p><strong>Dirección:</strong> {decryptedData.decryptedAddress}</p>
                             <p><strong>Tarjeta de Crédito:</strong> {decryptedData.decryptedCreditCard}</p>
+                            <p className="break-words"><strong>Contraseña:</strong> No es posible el decifrado de un hash!</p>
                         </div>
                     )}
                 </div>

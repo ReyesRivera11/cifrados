@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { ClipLoader } from 'react-spinners';
 function Cifrados() {
     const [formData, setFormData] = useState({
         userKey: '',
@@ -15,6 +16,8 @@ function Cifrados() {
 
     const [decryptKey, setDecryptKey] = useState('');
     const [encryptedData, setEncryptedData] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading2, setIsLoading2] = useState(false);
     const [decryptedData, setDecryptedData] = useState({});
     const [errorMessages, setErrorMessages] = useState({
         userKey: '',
@@ -30,19 +33,14 @@ function Cifrados() {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // Validar solo números para la tarjeta de crédito
-        if (name === 'creditCard') {
-            if (!/^\d*$/.test(value)) {
-                setErrorMessages(prev => ({ ...prev, creditCard: 'Solo se permiten números en la tarjeta de crédito.' }));
-            } else {
-                setErrorMessages(prev => ({ ...prev, creditCard: '' })); // Limpia el mensaje de error si la validación es correcta
-            }
-        }
-
+        // Actualiza el formData en cada cambio
         setFormData({
             ...formData,
             [name]: value
         });
+
+        // Llama a la función validateField para validar en tiempo real
+        validateField(name, value);
     };
 
     const validateField = (name, value) => {
@@ -99,6 +97,7 @@ function Cifrados() {
                 break;
         }
 
+        // Actualiza los mensajes de error
         setErrorMessages((prev) => ({
             ...prev,
             [name]: errorMessage
@@ -121,27 +120,41 @@ function Cifrados() {
     };
 
     const handleEncrypt = () => {
-        // Comprobar errores antes de cifrar
+        // Primero valida cada campo
+        let hasErrors = false;
         for (const [key, value] of Object.entries(formData)) {
-            if (!value) {
-                validateField(key, value);
+            validateField(key, value);
+            if (!value || errorMessages[key] !== '') {
+                hasErrors = true;  // Si algún campo tiene error, lo marcamos
             }
         }
 
-        // Solo continuar si no hay errores
-        if (Object.values(errorMessages).every(msg => msg === '')) {
+        // Espera a que las validaciones se completen antes de proceder
+        if (hasErrors) {
+            toast.error('Por favor, corrige los errores antes de enviar.');
+            return;  // Detiene la ejecución si hay errores
+        } else {
+            setIsLoading(true);
             axios.post('https://backend-cifrados.vercel.app/submit', formData)
                 .then(res => {
                     setEncryptedData(res.data.encryptedData);
+                    setIsLoading(false);
                 })
-                .catch(err =>  toast.error('Error en el servidor. Inténtalo nuevamente más tarde.'));
+                .catch(err => {
+                    toast.error('Error en el servidor. Inténtalo nuevamente más tarde.');
+                    setIsLoading(false);
+                });
         }
+
+
     };
+
 
     const handleDecrypt = () => {
         validateField('decryptKey', decryptKey);
 
         if (errorMessages.decryptKey === '') {
+            setIsLoading2(true);
             axios.post('https://backend-cifrados.vercel.app/decrypt', {
                 userKey: decryptKey,
                 encryptedName: encryptedData.encryptedName,
@@ -152,16 +165,20 @@ function Cifrados() {
             })
                 .then(res => {
                     setDecryptedData(res.data.decryptedData);
+                    setIsLoading2(false);
                 })
-                .catch(err => toast.error('Las claves no coinciden.'));
+                .catch(err => {
+                    toast.error('Las claves no coinciden.');
+                    setIsLoading2(false);
+                });
         }
     };
 
     return (
-        <div className=" w-full mx-auto px-6 grid grid-cols-1 md:grid-cols-6 gap-5 rounded-md">
+        <div className=" w-full mx-auto md:px-6 grid grid-cols-1 md:grid-cols-6 gap-5 rounded-md">
             {/* Sección del formulario */}
             <div className="col-span-3 md:max-h-[500px] bg-white p-2 rounded-md shadow-2xl">
-            <ToastContainer />
+                <ToastContainer />
                 <h1 className="text-2xl font-bold mb-6 text-center">Cifrado de Datos con Express</h1>
 
                 <div className="grid md:grid-cols-2 gap-2 mb-4 ">
@@ -216,9 +233,14 @@ function Cifrados() {
 
                 <button
                     onClick={handleEncrypt}
+                    disabled={Boolean(isLoading)}
                     className="w-full lg:w-48 text-white bg-violet-600 px-4 py-2 rounded-lg hover:bg-violet-800 transition duration-200 hover:text-white font-bold"
                 >
-                    Cifrar Datos
+                    {
+                        isLoading ? <ClipLoader color="#fff" loading={isLoading} size={10} /> : <>
+                            Cifrar
+                        </>
+                    }
                 </button>
 
 
@@ -256,10 +278,15 @@ function Cifrados() {
                                 />
                                 {errorMessages.decryptKey && <p className="text-red-500 text-sm mt-1">{errorMessages.decryptKey}</p>}
                                 <button
+                                    disabled={Boolean(isLoading2)}
                                     onClick={handleDecrypt}
                                     className="w-full mt-2 lg:w-48 text-white bg-violet-600 px-4 py-2 rounded-lg hover:bg-violet-800 transition duration-200 hover:text-white font-bold"
                                 >
-                                    Descifrar Datos
+                                    {
+                                        isLoading2 ? <ClipLoader color="#fff" loading={isLoading2} size={10} /> : <>
+                                            Descifrar
+                                        </>
+                                    }
                                 </button>
                             </div>
 
@@ -276,6 +303,7 @@ function Cifrados() {
                             <p className="break-words"><strong>Dirección:</strong> {decryptedData.decryptedAddress}</p>
                             <p className="break-words"><strong>Teléfono:</strong> {decryptedData.decryptedPhone}</p>
                             <p className="break-words"><strong>Tarjeta de Crédito:</strong> {decryptedData.decryptedCreditCard}</p>
+                            <p className="break-words"><strong>Contraseña:</strong> No es posible el decifrado de un hash!</p>
                         </div>
                     </div>
                 )}

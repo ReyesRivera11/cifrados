@@ -16,7 +16,7 @@ function AcercaDe() {
                     <p className="text-lg font-semibold">Cuatrimestre: <span className="font-normal">7mo</span></p>
                     <p className="text-lg font-semibold">Grupo: <span className="font-normal">A</span></p>
                     <p className="text-lg font-semibold">Carrera: <span className="font-normal">Ingeniería en desarrollo y gestión de software</span></p>
-                    <p className="text-lg font-semibold">Universidad: <span className="font-normal">Universidad Tecnológica de la Huasteca Hidalgunese</span></p>
+                    <p className="text-lg font-semibold">Universidad: <span className="font-normal">Universidad Tecnológica de la Huasteca Hidalguense</span></p>
                 </div>
             </div>
 
