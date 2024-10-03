@@ -48,7 +48,7 @@ function CifradoDjango() {
             [name]: value
         });
     };
-
+    const api ="http://localhost:3001"
     const handleEncrypt = () => {
         // Reset error states
         setEncryptErrorMessage('');
@@ -93,8 +93,9 @@ function CifradoDjango() {
         if (Object.keys(errors).length > 0 || phoneError || creditCardError) {
             return;
         }
+
         setIsLoading(true);
-        axios.post('https://cifrados.onrender.com/encryption/submit/', formData)
+        axios.post(`${api}/encryption/submit/`, formData)
             .then(res => {
                 setEncryptedData(res.data);
                 setEncryptErrorMessage('');
@@ -126,7 +127,7 @@ function CifradoDjango() {
             return;
         }
         setIsLoading2(true);
-        axios.post('https://cifrados.onrender.com/encryption/decrypt/', {
+        axios.post(`${api}/encryption/decrypt/`, {
             userKey: decryptKey,
             encryptedName: encryptedData.encryptedName,
             encryptedAddress: encryptedData.encryptedAddress,

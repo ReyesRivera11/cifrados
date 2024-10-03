@@ -118,7 +118,8 @@ function Cifrados() {
         const phoneRegex = /^\d{10}$/; // Suponiendo que se requieren 10 dígitos
         return phoneRegex.test(phone);
     };
-
+    const api = "http://localhost:3001";
+    // const api = "https://backend-cifrados.vercel.app";
     const handleEncrypt = () => {
         // Primero valida cada campo
         let hasErrors = false;
@@ -135,7 +136,7 @@ function Cifrados() {
             return;  // Detiene la ejecución si hay errores
         } else {
             setIsLoading(true);
-            axios.post('https://backend-cifrados.vercel.app/submit', formData)
+            axios.post(`${api}/submit`, formData)
                 .then(res => {
                     setEncryptedData(res.data.encryptedData);
                     setIsLoading(false);
@@ -155,7 +156,7 @@ function Cifrados() {
 
         if (errorMessages.decryptKey === '') {
             setIsLoading2(true);
-            axios.post('https://backend-cifrados.vercel.app/decrypt', {
+            axios.post(`${api}/decrypt`, {
                 userKey: decryptKey,
                 encryptedName: encryptedData.encryptedName,
                 encryptedAddress: encryptedData.encryptedAddress,

@@ -1,4 +1,4 @@
-# settings.py completo
+# settings.py
 
 import os
 from pathlib import Path
@@ -18,7 +18,10 @@ ALLOWED_HOSTS = ['reyesrivera11.github.io', 'localhost', '127.0.0.1', '.onrender
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
+    'django.contrib.auth',  # Agregar django.contrib.auth para la autenticación
     'django.contrib.contenttypes',
+    'django.contrib.sessions',  # Agregar django.contrib.sessions para las sesiones
+    'django.contrib.messages',  # Agregar django.contrib.messages para manejo de mensajes
     'django.contrib.staticfiles',
     'encryption_app',  # Aplicación de cifrado
     'corsheaders',
@@ -27,9 +30,11 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoise para servir archivos estáticos en producción
+    'django.contrib.sessions.middleware.SessionMiddleware',  # Agregar middleware de sesiones
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # Agregar middleware de autenticación
+    'django.contrib.messages.middleware.MessageMiddleware',  # Agregar middleware de mensajes
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -49,7 +54,8 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
+                'django.contrib.auth.context_processors.auth',  # Contexto de autenticación
+                'django.contrib.messages.context_processors.messages',  # Contexto de mensajes
             ],
         },
     },
