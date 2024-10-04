@@ -5,6 +5,7 @@ import ComparacionCifrados from './components/ComparacionCifrados';
 import Cifrados from './components/CifradoExpress';
 import CifradoDjango from './components/CifradoDjango';
 import AcercaDe from './components/AcercaDe';
+import ComparacionFrameworks from './components/ComparacionFrameworks';
 
 function App() {
   const [tipoCifrado, setTipoCifrado] = useState('cesar');
@@ -16,11 +17,15 @@ function App() {
       : 'text-black hover:bg-gray-200 hover:text-black hover:rounded-lg transition-colors'; // Inactivo: Texto negro, hover con fondo gris claro
   };
 
+  const handleSelectChange = (e) => {
+    setTipoCifrado(e.target.value);
+  };
+
   return (
-    <div className=" bg-gray-200/30 min-h-screen flex flex-col items-center  relative">
+    <div className="bg-gray-200/30 min-h-screen flex flex-col items-center relative">
       {/* Navigation Bar */}
-      <nav className="flex bg-white items-center justify-between  text-gray-900 fixed top-0 left-0 w-full z-10  text-nowrap p-3">
-        <h1 className=" font-bold uppercase ">Aplicación de Cifrado</h1>
+      <nav className="flex bg-white items-center justify-between text-gray-900 fixed top-0 left-0 w-full z-10 p-3">
+        <h1 className="font-bold uppercase">Aplicación de Cifrado</h1>
 
         {/* Burger Menu for Mobile */}
         <button
@@ -38,24 +43,29 @@ function App() {
           )}
         </button>
 
-        {/* Desktop Navigation */}
-        <div className="hidden  lg:flex justify-center items-center space-x-6">
-          <button className={`py-1 px-4  transition ${tabClass('cesar')}`} onClick={() => setTipoCifrado('cesar')}>
-            Cifrado César
+        {/* Desktop Navigation with Select */}
+        <div className="hidden lg:flex justify-center items-center space-x-6">
+        <button
+            className={`py-1 px-4 transition ${tabClass('express-django')}`}
+            onClick={() => setTipoCifrado('express-django')}
+          >
+            Comparación frameworks
           </button>
-          <button className={`py-1 px-4  transition ${tabClass('escitala')}`} onClick={() => setTipoCifrado('escitala')}>
-            Cifrado Escítala
-          </button>
-          <button className={`py-1 px-4  transition ${tabClass('comparacion')}`} onClick={() => setTipoCifrado('comparacion')}>
-            Comparación
-          </button>
-          <button className={`py-1 px-4  transition ${tabClass('cifrados')}`} onClick={() => setTipoCifrado('cifrados')}>
-            Cifrado (Express)
-          </button>
-          <button className={`py-1 px-4  transition ${tabClass('django')}`} onClick={() => setTipoCifrado('django')}>
-            Cifrado (Django)
-          </button>
-          <button className={`py-1 px-4  transition ${tabClass('acerca')}`} onClick={() => setTipoCifrado('acerca')}>
+          <select
+            value={tipoCifrado}
+            onChange={handleSelectChange}
+            className="py-2 px-4 bg-transparent shadow-none focus:outline-none focus:ring-0 transition-colors"
+          >
+            <option value="cesar">Cifrado César</option>
+            <option value="escitala">Cifrado Escítala</option>
+            <option value="comparacion">Comparación</option>
+            <option value="cifrados">Cifrado (Express)</option>
+            <option value="django">Cifrado (Django)</option>
+          </select>
+          <button
+            className={`py-1 px-4 transition ${tabClass('acerca')}`}
+            onClick={() => setTipoCifrado('acerca')}
+          >
             Acerca de
           </button>
         </div>
@@ -63,34 +73,53 @@ function App() {
 
       {/* Mobile Menu */}
       <div className={`lg:hidden ${menuOpen ? 'block' : 'hidden'} w-full p-4 absolute z-20 bg-white shadow-lg`}>
-        <button className={`w-full py-2  transition ${tabClass('cesar')}`} onClick={() => { setTipoCifrado('cesar'); setMenuOpen(false); }}>
+        <button
+          className={`w-full py-2 transition ${tabClass('cesar')}`}
+          onClick={() => { setTipoCifrado('cesar'); setMenuOpen(false); }}
+        >
           Cifrado César
         </button>
-        <button className={`w-full py-2  transition ${tabClass('escitala')}`} onClick={() => { setTipoCifrado('escitala'); setMenuOpen(false); }}>
+        <button
+          className={`w-full py-2 transition ${tabClass('escitala')}`}
+          onClick={() => { setTipoCifrado('escitala'); setMenuOpen(false); }}
+        >
           Cifrado Escítala
         </button>
-        <button className={`w-full py-2  transition ${tabClass('comparacion')}`} onClick={() => { setTipoCifrado('comparacion'); setMenuOpen(false); }}>
+        <button
+          className={`w-full py-2 transition ${tabClass('comparacion')}`}
+          onClick={() => { setTipoCifrado('comparacion'); setMenuOpen(false); }}
+        >
           Comparación
         </button>
-        <button className={`w-full py-2  transition ${tabClass('cifrados')}`} onClick={() => { setTipoCifrado('cifrados'); setMenuOpen(false); }}>
+        <button
+          className={`w-full py-2 transition ${tabClass('cifrados')}`}
+          onClick={() => { setTipoCifrado('cifrados'); setMenuOpen(false); }}
+        >
           Cifrado (Express)
         </button>
-        <button className={`w-full py-2  transition ${tabClass('django')}`} onClick={() => { setTipoCifrado('django'); setMenuOpen(false); }}>
+        <button
+          className={`w-full py-2 transition ${tabClass('django')}`}
+          onClick={() => { setTipoCifrado('django'); setMenuOpen(false); }}
+        >
           Cifrado (Django)
         </button>
-        <button className={`w-full py-2  transition ${tabClass('acerca')}`} onClick={() => { setTipoCifrado('acerca'); setMenuOpen(false); }}>
+        <button
+          className={`w-full py-2 transition ${tabClass('acerca')}`}
+          onClick={() => { setTipoCifrado('acerca'); setMenuOpen(false); }}
+        >
           Acerca de
         </button>
       </div>
 
       {/* Main Content */}
-      <div className="w-full p-8 mt-12  h-auto">
+      <div className="w-full p-8 mt-12 h-auto">
         {tipoCifrado === 'cesar' && <CifradoCesar />}
         {tipoCifrado === 'escitala' && <CifradoEscitala />}
         {tipoCifrado === 'comparacion' && <ComparacionCifrados />}
         {tipoCifrado === 'cifrados' && <Cifrados />}
         {tipoCifrado === 'django' && <CifradoDjango />}
         {tipoCifrado === 'acerca' && <AcercaDe />}
+        {tipoCifrado === 'express-django' && <ComparacionFrameworks />}
       </div>
     </div>
   );

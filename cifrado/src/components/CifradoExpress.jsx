@@ -118,8 +118,8 @@ function Cifrados() {
         const phoneRegex = /^\d{10}$/; // Suponiendo que se requieren 10 dígitos
         return phoneRegex.test(phone);
     };
-    const api = "http://localhost:3001";
-    // const api = "https://backend-cifrados.vercel.app";
+    // const api = "http://localhost:3001";
+    const api = "https://backend-cifrados.vercel.app";
     const handleEncrypt = () => {
         // Primero valida cada campo
         let hasErrors = false;
@@ -182,7 +182,7 @@ function Cifrados() {
                 <ToastContainer />
                 <h1 className="text-2xl font-bold mb-6 text-center">Cifrado de Datos con Express</h1>
 
-                <div className="grid md:grid-cols-2 gap-2 mb-4 ">
+                <div className="grid md:grid-cols-1 gap-2 mb-4 ">
                     <div className="col-span-2">
                         <label htmlFor="userKey" className="block text-sm font-medium text-gray-700 mb-1">Clave (16 caracteres)</label>
                         <input

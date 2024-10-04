@@ -1,5 +1,5 @@
 import React from 'react';
-import Autor from "../assets/autor.jpg";
+import Autor from "../assets/autor.jpg";    
 function AcercaDe() {
     return (
         <div className="w-full mx-auto px-6 grid grid-cols-1 md:grid-cols-6 gap-5 rounded-md">
@@ -34,7 +34,7 @@ function AcercaDe() {
                         <strong>Escítala:</strong> Una técnica antigua que utiliza un bastón para leer mensajes cifrados en una cinta de pergamino.
                     </li>
                     <li>
-                        <strong>Cifrado Simétrico:</strong> Un método en el que tanto el emisor como el receptor utilizan la misma clave para cifrar y descifrar.
+                        <strong>Cifrado Simétrico Serpent:</strong> Un método en el que tanto el emisor como el receptor utilizan la misma clave para cifrar y descifrar.
                     </li>
                     <li>
                         <strong>Cifrado Asimétrico (RSA):</strong> Utiliza un par de claves, una pública y una privada, para cifrar y descifrar datos.
