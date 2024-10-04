@@ -3,6 +3,7 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ClipLoader } from 'react-spinners';
+
 function Cifrados() {
     const [formData, setFormData] = useState({
         userKey: '',
@@ -33,13 +34,11 @@ function Cifrados() {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // Actualiza el formData en cada cambio
         setFormData({
             ...formData,
             [name]: value
         });
 
-        // Llama a la función validateField para validar en tiempo real
         validateField(name, value);
     };
 
@@ -97,7 +96,6 @@ function Cifrados() {
                 break;
         }
 
-        // Actualiza los mensajes de error
         setErrorMessages((prev) => ({
             ...prev,
             [name]: errorMessage
@@ -118,22 +116,21 @@ function Cifrados() {
         const phoneRegex = /^\d{10}$/; // Suponiendo que se requieren 10 dígitos
         return phoneRegex.test(phone);
     };
-    // const api = "http://localhost:3001";
+
     const api = "https://backend-cifrados.vercel.app";
+
     const handleEncrypt = () => {
-        // Primero valida cada campo
         let hasErrors = false;
         for (const [key, value] of Object.entries(formData)) {
             validateField(key, value);
             if (!value || errorMessages[key] !== '') {
-                hasErrors = true;  // Si algún campo tiene error, lo marcamos
+                hasErrors = true;
             }
         }
 
-        // Espera a que las validaciones se completen antes de proceder
         if (hasErrors) {
             toast.error('Por favor, corrige los errores antes de enviar.');
-            return;  // Detiene la ejecución si hay errores
+            return;
         } else {
             setIsLoading(true);
             axios.post(`${api}/submit`, formData)
@@ -146,10 +143,7 @@ function Cifrados() {
                     setIsLoading(false);
                 });
         }
-
-
     };
-
 
     const handleDecrypt = () => {
         validateField('decryptKey', decryptKey);
@@ -176,13 +170,12 @@ function Cifrados() {
     };
 
     return (
-        <div className=" w-full mx-auto md:px-6 grid grid-cols-1 md:grid-cols-6 gap-5 rounded-md">
-            {/* Sección del formulario */}
+        <div className="w-full mx-auto md:px-6 grid grid-cols-1 md:grid-cols-6 gap-5 rounded-md">
             <div className="col-span-3 md:max-h-[500px] bg-white p-2 rounded-md shadow-2xl">
                 <ToastContainer />
                 <h1 className="text-2xl font-bold mb-6 text-center">Cifrado de Datos con Express</h1>
 
-                <div className="grid md:grid-cols-1 gap-2 mb-4 ">
+                <div className="grid md:grid-cols-2 gap-2 mb-4 ">
                     <div className="col-span-2">
                         <label htmlFor="userKey" className="block text-sm font-medium text-gray-700 mb-1">Clave (16 caracteres)</label>
                         <input
@@ -195,19 +188,18 @@ function Cifrados() {
                         {errorMessages.userKey && <p className="text-red-500 text-sm mt-1">{errorMessages.userKey}</p>}
                     </div>
 
-                    {['name', 'email', 'phone', 'address', 'password'].map((field) => (
-                        <div key={field} className={`col-span-${field === 'password' ? '2' : '1'}`}>
+                    {['name', 'email', 'phone', 'address'].map((field) => (
+                        <div key={field} className="col-span-1">
                             <label htmlFor={field} className="block text-sm font-medium text-gray-700 mb-1">
                                 {field === 'name' && 'Nombre'}
                                 {field === 'email' && 'Email'}
                                 {field === 'phone' && 'Teléfono'}
                                 {field === 'address' && 'Dirección'}
-                                {field === 'password' && 'Contraseña'}
                             </label>
                             <input
                                 id={field}
                                 name={field}
-                                type={field === 'password' ? 'password' : 'text'}
+                                type="text"
                                 placeholder={field}
                                 className={`w-full p-2 border ${errorMessages[field] ? 'border-red-500' : 'border-gray-300'} rounded-md`}
                                 onChange={handleChange}
@@ -230,6 +222,19 @@ function Cifrados() {
                         />
                         {errorMessages.creditCard && <p className="text-red-500 text-sm mt-1">{errorMessages.creditCard}</p>}
                     </div>
+
+                    <div className="col-span-2">
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                        <input
+                            id="password"
+                            name="password"
+                            type="password"
+                            placeholder="Contraseña"
+                            className={`w-full p-2 border ${errorMessages.password ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                            onChange={handleChange}
+                        />
+                        {errorMessages.password && <p className="text-red-500 text-sm mt-1">{errorMessages.password}</p>}
+                    </div>
                 </div>
 
                 <button
@@ -238,16 +243,13 @@ function Cifrados() {
                     className="w-full lg:w-48 text-white bg-violet-600 px-4 py-2 rounded-lg hover:bg-violet-800 transition duration-200 hover:text-white font-bold"
                 >
                     {
-                        isLoading ? <ClipLoader color="#fff" loading={isLoading} size={10} /> : <>
-                            Cifrar
-                        </>
+                        isLoading ? <ClipLoader color="#fff" loading={isLoading} size={10} /> : <span>Cifrar</span>
                     }
                 </button>
-
-
             </div>
+
             <div className="col-span-3">
-                <div className=" bg-white shadow-xl p-6 rounded-lg">
+                <div className="bg-white shadow-xl p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-4 text-gray-800">Datos Cifrados</h3>
                     <div className="p-6 rounded-lg border border-gray-300 overflow-auto max-h-60 ">
                         <p className="break-words mb-2"><strong>Nombre Encriptado:</strong> <span className="text-gray-600">{encryptedData.encryptedName?.encryptedData}</span></p>
@@ -261,44 +263,37 @@ function Cifrados() {
 
                 {
                     Object.keys(encryptedData).length > 0 && (
-                        <>
-                            {/* Sección para Descifrar */}
-                            <div className="mt-6 bg-white shadow-md rounded-lg p-4">
-                                <h3 className="text-lg font-semibold mb-4 text-gray-800">Descifrar Datos</h3>
-                                <label htmlFor="decryptKey" className="block text-sm font-medium text-gray-700 mb-1">Clave para Descifrar</label>
-                                <input
-                                    id="decryptKey"
-                                    type="text"
-                                    placeholder="Ingrese la clave para descifrar"
-                                    value={decryptKey}
-                                    onChange={(e) => {
-                                        setDecryptKey(e.target.value);
-                                        validateField('decryptKey', e.target.value);
-                                    }}
-                                    className={`w-full p-3 border ${errorMessages.decryptKey ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-150`}
-                                />
-                                {errorMessages.decryptKey && <p className="text-red-500 text-sm mt-1">{errorMessages.decryptKey}</p>}
-                                <button
-                                    disabled={Boolean(isLoading2)}
-                                    onClick={handleDecrypt}
-                                    className="w-full mt-2 lg:w-48 text-white bg-violet-600 px-4 py-2 rounded-lg hover:bg-violet-800 transition duration-200 hover:text-white font-bold"
-                                >
-                                    {
-                                        isLoading2 ? <ClipLoader color="#fff" loading={isLoading2} size={10} /> : <>
-                                            Descifrar
-                                        </>
-                                    }
-                                </button>
-                            </div>
-
-                        </>
+                        <div className="mt-6 bg-white shadow-md rounded-lg p-4">
+                            <h3 className="text-lg font-semibold mb-4 text-gray-800">Descifrar Datos</h3>
+                            <label htmlFor="decryptKey" className="block text-sm font-medium text-gray-700 mb-1">Clave para Descifrar</label>
+                            <input
+                                id="decryptKey"
+                                type="text"
+                                placeholder="Ingrese la clave para descifrar"
+                                value={decryptKey}
+                                onChange={(e) => {
+                                    setDecryptKey(e.target.value);
+                                    validateField('decryptKey', e.target.value);
+                                }}
+                                className={`w-full p-3 border ${errorMessages.decryptKey ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-150`}
+                            />
+                            {errorMessages.decryptKey && <p className="text-red-500 text-sm mt-1">{errorMessages.decryptKey}</p>}
+                            <button
+                                disabled={Boolean(isLoading2)}
+                                onClick={handleDecrypt}
+                                className="w-full mt-2 lg:w-48 text-white bg-violet-600 px-4 py-2 rounded-lg hover:bg-violet-800 transition duration-200 hover:text-white font-bold"
+                            >
+                                {
+                                    isLoading2 ? <ClipLoader color="#fff" loading={isLoading2} size={10} /> : <span>Descifrar</span>
+                                }
+                            </button>
+                        </div>
                     )
                 }
                 {Object.keys(decryptedData).length > 0 && (
                     <div className="mt-6 bg-white shadow-2xl p-4 rounded-md">
-
                         <h3 className="text-lg font-semibold mb-2">Datos Descifrados</h3>
-                        <div className="p-4   max-h-60">
+                        <div className="p-4 max-h-60">
                             <p className="break-words"><strong>Nombre:</strong> {decryptedData.decryptedName}</p>
                             <p className="break-words"><strong>Email:</strong> {decryptedData.decryptedEmail}</p>
                             <p className="break-words"><strong>Dirección:</strong> {decryptedData.decryptedAddress}</p>
@@ -309,7 +304,6 @@ function Cifrados() {
                     </div>
                 )}
             </div>
-
         </div>
     );
 }

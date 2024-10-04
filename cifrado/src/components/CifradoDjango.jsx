@@ -48,7 +48,7 @@ function CifradoDjango() {
             [name]: value
         });
     };
-    const api ="http://localhost:3001"
+    const api ="https://cifrados.onrender.com"
     const handleEncrypt = () => {
         // Reset error states
         setEncryptErrorMessage('');
